@@ -2,64 +2,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+# Since Argo CD has issues with remote URLs in Kustomize,
+# we'll have Argo CD apply the cert-manager.yaml directly
+
 resources:
-  - namespace.yaml
-  - https://github.com/cert-manager/cert-manager/releases/download/v1.17.2/cert-manager.yaml
   - clusterissuer.yaml
 
-# Apply patches to reduce resource usage
-patchesStrategicMerge:
-  - |-
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: cert-manager
-      namespace: cert-manager
-    spec:
-      template:
-        spec:
-          containers:
-          - name: cert-manager-controller
-            resources:
-              requests:
-                cpu: 50m
-                memory: 100Mi
-              limits:
-                cpu: 100m
-                memory: 200Mi
-  - |-
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: cert-manager-webhook
-      namespace: cert-manager
-    spec:
-      template:
-        spec:
-          containers:
-          - name: cert-manager-webhook
-            resources:
-              requests:
-                cpu: 20m
-                memory: 50Mi
-              limits:
-                cpu: 50m
-                memory: 100Mi
-  - |-
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: cert-manager-cainjector
-      namespace: cert-manager
-    spec:
-      template:
-        spec:
-          containers:
-          - name: cert-manager-cainjector
-            resources:
-              requests:
-                cpu: 20m
-                memory: 50Mi
-              limits:
-                cpu: 50m
-                memory: 100Mi
